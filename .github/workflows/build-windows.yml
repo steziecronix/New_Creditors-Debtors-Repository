@@ -1,0 +1,33 @@
+name: Build Windows Installer
+
+# Runs automatically whenever you push to main, and can also be
+# triggered manually from the Actions tab with a button click.
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch: {}
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build the Windows installer
+        run: npm run dist
+
+      - name: Upload the .exe as a downloadable artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Paul-Enterprises-POS-Windows-Installer
+          path: release/*.exe
