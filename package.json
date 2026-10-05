@@ -1,0 +1,65 @@
+{
+  "name": "paul-enterprises-pos",
+  "productName": "Paul Enterprises POS",
+  "version": "1.0.0",
+  "description": "Offline-first Point of Sale desktop app for Paul Enterprises — Windows .exe build.",
+  "main": "main.js",
+  "author": "Paul Enterprises",
+  "license": "UNLICENSED",
+  "private": true,
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder --win --publish=never",
+    "test": "node test-main.js && node licensing/test-machine-id.js && node licensing/test-validate-key.js"
+  },
+  "dependencies": {
+    "better-sqlite3": "^13.0.3",
+    "electron-store": "^11.0.2",
+    "exceljs": "^4.4.0",
+    "node-thermal-printer": "^4.6.1",
+    "pdfkit": "^0.20.2"
+  },
+  "devDependencies": {
+    "electron": "^44.0.0",
+    "electron-builder": "^26.15.3"
+  },
+  "build": {
+    "appId": "com.paulenterprises.pos",
+    "productName": "Paul Enterprises POS",
+    "directories": {
+      "output": "release",
+      "buildResources": "build"
+    },
+    "files": [
+      "**/*",
+      "!**/test-*.js",
+      "!**/generate-*.js",
+      "!**/keys-README.md",
+      "!licensing/keys/**",
+      "!**/*.map",
+      "!release/**/*"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": ["x64"]
+        }
+      ],
+      "icon": "build/icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Paul Enterprises POS",
+      "installerIcon": "build/icon.ico",
+      "uninstallerIcon": "build/icon.ico",
+      "installerHeaderIcon": "build/icon.ico",
+      "installerSidebar": "build/installer-sidebar.bmp",
+      "uninstallerSidebar": "build/installer-sidebar.bmp"
+    }
+  }
+}

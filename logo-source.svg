@@ -1,0 +1,34 @@
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1F3155"/>
+      <stop offset="100%" stop-color="#16233D"/>
+    </linearGradient>
+    <linearGradient id="monogram" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F4E9C9"/>
+      <stop offset="100%" stop-color="#A9812F"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background plate -->
+  <rect x="0" y="0" width="512" height="512" rx="44" fill="url(#bg)"/>
+
+  <!-- Corner brackets (the signature "plate" motif) -->
+  <g stroke="#A9812F" stroke-width="10" stroke-linecap="square" fill="none">
+    <path d="M 54 130 L 54 54 L 130 54"/>
+    <path d="M 382 54 L 458 54 L 458 130"/>
+    <path d="M 458 382 L 458 458 L 382 458"/>
+    <path d="M 130 458 L 54 458 L 54 382"/>
+  </g>
+
+  <!-- PE monogram -->
+  <text x="256" y="300" font-family="Georgia, 'Times New Roman', serif" font-weight="700"
+        font-size="188" fill="url(#monogram)" text-anchor="middle" letter-spacing="-6">PE</text>
+
+  <!-- Underline rule -->
+  <rect x="146" y="336" width="220" height="6" fill="#1E7A82"/>
+
+  <!-- Small tagline -->
+  <text x="256" y="384" font-family="'Courier New', monospace" font-weight="700" font-size="26"
+        fill="#C9CFDA" text-anchor="middle" letter-spacing="6">POS</text>
+</svg>

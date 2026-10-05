@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Paul Enterprises — Debtors</title>
+<link rel="stylesheet" href="./assets/fonts/fonts.css">
+<style>
+:root{--ink:#16233D;--ink-soft:#4B5568;--stone:#E9EDF6;--stone-dim:#DCE3F1;--paper:#FCFDFF;--brass:#A9812F;--brass-soft:#F4E9C9;--brass-deep:#7C5D20;--indigo:#2A3F6B;--forest:#1F6F5C;--forest-soft:#DCEEE7;--clay:#9B4436;--clay-soft:#F1E1DA;--teal:#1E7A82;--plum:#6E4A94;--line:#C4CEE3;--shadow:0 10px 28px -14px rgba(22,35,61,.22)}
+*{box-sizing:border-box}html,body{margin:0}
+body{background:radial-gradient(circle at 1px 1px,rgba(22,35,61,.07) 1px,transparent 0) 0 0/24px 24px,radial-gradient(ellipse 1000px 640px at 6% -4%,rgba(42,63,107,.16),transparent 62%),var(--stone);background-attachment:fixed;color:var(--ink);font-family:'Inter',sans-serif;min-height:100vh;-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}
+.plate{position:relative;background:var(--paper);border:1px solid var(--line);box-shadow:var(--shadow);border-radius:3px}
+.plate::before,.plate::after,.plate .bl,.plate .br{content:"";position:absolute;width:15px;height:15px;border:2px solid var(--brass);pointer-events:none}
+.plate::before{top:-1px;left:-1px;border-right:none;border-bottom:none}.plate::after{top:-1px;right:-1px;border-left:none;border-bottom:none}
+.plate .bl{bottom:-1px;left:-1px;border-right:none;border-top:none}.plate .br{bottom:-1px;right:-1px;border-left:none;border-top:none}
+.mono{font-family:'IBM Plex Mono',monospace}
+.shell{max-width:1480px;margin:20px auto 44px;padding:0 20px}
+.topbar{display:flex;gap:16px;margin-bottom:16px;flex-wrap:wrap}
+.brandplate{flex:0 0 260px;padding:14px 24px;display:flex;flex-direction:column;justify-content:center}
+.b1{font-family:'Titan One',cursive;font-size:23px;line-height:1;color:var(--indigo)}.b2{font-family:'Titan One',cursive;font-size:13px;margin-top:6px;color:var(--forest)}
+.navplate{flex:1;padding:14px 26px;display:flex;flex-direction:column;justify-content:center;gap:10px;min-width:280px}
+.navrow{display:flex;gap:16px;flex-wrap:wrap}
+.navrow a{font-family:'IBM Plex Mono',monospace;font-size:12.5px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft);padding:6px 0;border-bottom:2px solid transparent}
+.navrow a.active{color:var(--ink);border-color:var(--brass)}.navrow a:hover{color:var(--ink)}
+.pagetitle{font-family:'Fraunces',serif;font-weight:700;font-size:23px;color:var(--clay)}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:16px}
+@media(max-width:900px){.stats{grid-template-columns:repeat(2,1fr)}}
+.stat{padding:17px 18px;border-top:3px solid var(--c,var(--indigo))}
+.stat .k{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-soft)}
+.stat .n{font-family:'Fraunces',serif;font-weight:800;font-size:27px;margin:8px 0 4px;color:var(--c,var(--indigo))}.stat .s{font-size:11.5px;color:var(--ink-soft)}
+.table-plate{padding:19px 20px 14px}
+.section-head{font-family:'Fraunces',serif;font-weight:700;font-size:18px;display:flex;align-items:center;gap:10px}
+.section-head i{width:7px;height:19px;background:var(--c,var(--brass));border-radius:1px}
+.fill{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.tools{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.tools input,.tools select,.fld input,.fld select{padding:9px 10px;border:1px solid var(--line);background:var(--stone);border-radius:2px;font:12.5px 'Inter',sans-serif;color:var(--ink)}
+.tools input[type=text]{flex:1;min-width:200px}.tools label{font:600 9.5px 'IBM Plex Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft);display:flex;align-items:center;gap:6px}
+input:focus,select:focus{outline:none;border-color:var(--teal);background:var(--paper)}
+.scroll{overflow-x:auto}
+table.dt{width:100%;border-collapse:collapse;min-width:1020px}
+.dt th{text-align:left;font:600 9.5px 'IBM Plex Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft);padding:0 8px 8px 0;border-bottom:1px solid var(--line);white-space:nowrap}
+.dt td{padding:11px 8px 11px 0;border-bottom:1px solid var(--stone-dim);font-size:12.5px;vertical-align:middle}
+.dt .num{text-align:right;font-family:'IBM Plex Mono',monospace;font-size:12px}.dt th.num{text-align:right}
+.dt tr.main{cursor:pointer}.dt tr.main:hover td{background:rgba(42,63,107,.04)}
+.dt tr.tot td{border-top:2px solid var(--line);border-bottom:none;font-weight:700}
+.nm{font-weight:700}.nm small{display:block;font-weight:400;color:var(--ink-soft);font-size:11px}
+.caret{display:inline-block;transition:.15s;color:var(--brass-deep);margin-right:6px}.open .caret{transform:rotate(90deg)}
+tr.det td{background:var(--stone);padding:14px 16px}
+.det table{width:100%;border-collapse:collapse;background:var(--paper);border:1px solid var(--line)}
+.det th{font:600 9px 'IBM Plex Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft);padding:8px 10px;text-align:left;border-bottom:1px solid var(--line)}
+.det td{padding:8px 10px;border-bottom:1px solid var(--stone-dim);font-size:12px;background:none}
+.det .num{text-align:right;font-family:'IBM Plex Mono',monospace}
+.pill{font:600 9px 'IBM Plex Mono',monospace;letter-spacing:.06em;text-transform:uppercase;padding:3px 9px;border-radius:20px;white-space:nowrap}
+.g{background:var(--forest-soft);color:var(--forest)}.a{background:#FBF0DC;color:var(--brass-deep)}.r{background:var(--clay-soft);color:var(--clay)}
+.red{color:var(--clay)}.grn{color:var(--forest)}
+.btn{padding:6px 12px;font:600 10px 'IBM Plex Mono',monospace;letter-spacing:.05em;text-transform:uppercase;border-radius:2px;border:1px solid var(--line);background:var(--stone);color:var(--ink-soft)}
+.btn:hover{border-color:var(--brass);color:var(--ink)}.btn.pri{background:var(--teal);border-color:var(--teal);color:#fff}.btn.pri:hover{background:#175E64}
+.ov{display:none;position:fixed;inset:0;background:rgba(22,35,61,.55);z-index:50;align-items:center;justify-content:center}
+.ov.on{display:flex}.modal{background:var(--paper);border:1px solid var(--brass);border-radius:4px;padding:24px;width:400px;max-width:92vw;box-shadow:0 12px 40px rgba(22,35,61,.35)}
+.modal h3{font-family:'Fraunces',serif;font-size:17px;margin:0 0 2px}.modal .sub{font-size:12px;color:var(--ink-soft);margin-bottom:14px}
+.owed{background:var(--stone);border-radius:3px;padding:12px;margin-bottom:14px}.owed b{display:block;font:600 19px 'IBM Plex Mono',monospace;color:var(--clay);margin-top:4px}
+.fld{margin-bottom:12px}.fld label{display:block;font:600 9.5px 'IBM Plex Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:5px}.fld input,.fld select{width:100%}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:10px}.acts{display:flex;gap:10px;justify-content:flex-end;margin-top:6px}
+.hint{font-size:11px;color:var(--ink-soft);margin:-4px 0 12px}.empty{text-align:center;padding:26px;color:var(--ink-soft);font-size:13px}
+#toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--ink);color:var(--paper);padding:12px 22px;border-radius:3px;font:11.5px 'IBM Plex Mono',monospace;opacity:0;pointer-events:none;transition:.25s;z-index:60;border:1px solid var(--brass)}
+#toast.on{opacity:1;transform:translateX(-50%)}
+@media print{.tools,.btn,.navplate,.brandplate{display:none!important}body{background:#fff}}
+
+.clockplate{flex:0 0 180px;padding:14px 18px;display:flex;flex-direction:column;justify-content:center;align-items:flex-end;gap:4px;background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.clock-time{font-family:'IBM Plex Mono',monospace;font-size:19px;font-weight:600}.clock-date{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--brass-soft)}
+a.brandplate:hover{border-color:var(--brass)}
+.btn.sm{padding:4px 9px;font-size:9px}.btn.del{color:var(--clay);border-color:#E3C4BA;background:var(--clay-soft)}.btn.del:hover{background:var(--clay);border-color:var(--clay);color:#fff}
+.rowacts{display:flex;gap:6px;justify-content:flex-end;align-items:center;white-space:nowrap}
+.modal.wide{width:460px}.fld .full,.g2 .full{grid-column:1/-1}
+.cfmsg{font-size:13px;line-height:1.5;color:var(--ink);margin:6px 0 16px}
+.btn.danger{background:var(--clay);border-color:var(--clay);color:#fff}.btn.danger:hover{background:#7E3429}
+@media print{.clockplate,.rowacts{display:none!important}}
+</style></head><body>
+<div class="shell">
+  <div class="topbar">
+    <a class="plate brandplate" href="owner-dashboard.html#overview" title="Back to dashboard"><span class="bl"></span><span class="br"></span><div class="b1">PAUL ENTERPRISES</div><div class="b2">POINT OF SALE</div></a>
+    <div class="plate navplate"><span class="bl"></span><span class="br"></span>
+      <div class="navrow">
+        <a href="owner-dashboard.html#overview">Overview</a>
+        <a href="owner-dashboard.html#staff">Staff Setup</a>
+        <a href="owner-dashboard.html#inventory">Inventory</a>
+        <a href="owner-dashboard.html#sales">Sales</a>
+        <a href="owner-dashboard.html#purchases">Purchases</a>
+        <a href="owner-dashboard.html#customers">Customers</a>
+        <a href="owner-dashboard.html#reports">Reports</a>
+        <a href="owner-dashboard.html#settings">Settings</a>
+        <a href="creditors.html">Creditors</a>
+        <a href="debtors.html" class="active">Debtors</a>
+      </div>
+      <div class="pagetitle">Debtors — Customers Who Owe Us</div>
+    </div>
+    <div class="plate clockplate"><span class="bl"></span><span class="br"></span><div class="clock-time" id="clockTime"></div><div class="clock-date" id="clockDate"></div></div>
+  </div>
+  <div class="stats">
+    <div class="plate stat" style="--c:var(--clay)"><span class="bl"></span><span class="br"></span><div class="k">Total Owed to Shop</div><div class="n" id="sBal">—</div><div class="s" id="sBalSub"></div></div>
+    <div class="plate stat" style="--c:var(--indigo)"><span class="bl"></span><span class="br"></span><div class="k">Credit Given</div><div class="n" id="sGiven">—</div><div class="s" id="sGivenSub"></div></div>
+    <div class="plate stat" style="--c:var(--forest)"><span class="bl"></span><span class="br"></span><div class="k">Collected Back</div><div class="n" id="sPaid">—</div><div class="s" id="sRate"></div></div>
+    <div class="plate stat" style="--c:var(--brass)"><span class="bl"></span><span class="br"></span><div class="k">Overdue (30+ days)</div><div class="n" id="sOver">—</div><div class="s" id="sOverSub"></div></div>
+  </div>
+  <div class="plate table-plate"><span class="bl"></span><span class="br"></span>
+    <div class="fill"><div class="section-head" style="--c:var(--plum)"><i></i>Debtors — Customer Accounts</div><span class="pill r" id="badge"></span></div>
+    <div class="tools">
+      <input type="text" id="q" placeholder="Search customer name or phone…" oninput="draw()">
+      <select id="st" onchange="draw()"><option value="owing">Owing (incl. overdue)</option><option value="overdue">Overdue only</option><option value="clear">Cleared</option><option value="all">All customers</option></select>
+      <select id="sort" onchange="draw()"><option value="bal">Sort: highest balance</option><option value="name">Sort: name A–Z</option><option value="old">Sort: oldest debt</option></select>
+      <button class="btn" onclick="exportCsv()">Export CSV</button><button class="btn" onclick="print()">Print</button>
+    </div>
+    <div class="scroll"><table class="dt">
+      <thead><tr><th>Customer</th><th class="num">Credit Sales</th><th class="num">Credit Given</th><th class="num">Paid Back</th><th class="num">Balance</th><th>Last Purchase</th><th>Last Payment</th><th>Oldest Unpaid</th><th>Status</th><th class="num">Actions</th></tr></thead>
+      <tbody id="body"></tbody>
+    </table></div>
+  </div>
+</div>
+<div id="toast"></div>
+<div class="ov" id="pmOv" onclick="if(event.target===this)closePay()"><div class="modal">
+  <h3 id="pmTitle"></h3><div class="sub" id="pmSub"></div>
+  <div class="owed"><span class="mono" style="font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft)">Outstanding balance</span><b id="pmOwed"></b></div>
+  <div class="g2"><div class="fld"><label>Amount (KSh)</label><input type="number" id="pmAmt" min="1"></div><div class="fld"><label>Date</label><input type="date" id="pmDate"></div></div>
+  <div class="g2"><div class="fld"><label>Method</label><select id="pmMethod"><option>Cash</option><option>M-Pesa</option><option>Bank transfer</option><option>Cheque</option></select></div><div class="fld"><label>Reference</label><input type="text" id="pmRef" placeholder="e.g. M-Pesa code"></div></div>
+  <div class="hint">Applied to the oldest unpaid items first.</div>
+  <div class="acts"><button class="btn" onclick="closePay()">Cancel</button><button class="btn pri" onclick="confirmPay()">Record Payment</button></div>
+</div></div>
+<div class="ov" id="fmOv" onclick="if(event.target===this)closeForm()"><div class="modal wide">
+  <h3 id="fmTitle"></h3><div class="sub" id="fmSub"></div>
+  <div class="g2" id="fmBody"></div>
+  <div class="acts"><button class="btn" onclick="closeForm()">Cancel</button><button class="btn pri" onclick="saveForm()">Save Changes</button></div>
+</div></div>
+<div class="ov" id="cfOv" onclick="if(event.target===this)closeConfirm()"><div class="modal">
+  <h3 id="cfTitle"></h3><div class="cfmsg" id="cfMsg"></div>
+  <div class="acts"><button class="btn" onclick="closeConfirm()">Cancel</button><button class="btn danger" onclick="doConfirm()">Yes, Delete</button></div>
+</div></div>
+<script>
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmt=n=>'KSh '+Number(n||0).toLocaleString('en-KE',{maximumFractionDigits:2});
+const ymd=d=>d.toLocaleDateString('en-CA');
+const dago=n=>{const d=new Date();d.setDate(d.getDate()-n);return ymd(d)};
+const age=s=>Math.round((new Date(ymd(new Date()))-new Date(s))/864e5);
+const fdate=s=>new Date(s+'T00:00:00').toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});
+function toast(m){const t=$('toast');t.textContent=m;t.classList.add('on');clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove('on'),2800)}
+function csv(name,rows){const q=v=>'"'+String(v).replace(/"/g,'""')+'"';const b=new Blob([rows.map(r=>r.map(q).join(',')).join('\n')],{type:'text/csv'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=name;a.click();URL.revokeObjectURL(a.href)}
+// Shared payment modal: title, subtitle, amount owed -> calls onOk({amount,method,ref,date})
+let _ok=null,_max=0;
+function openPay(title,sub,owed,onOk){_ok=onOk;_max=owed;$('pmTitle').textContent=title;$('pmSub').textContent=sub;$('pmOwed').textContent=fmt(owed);$('pmAmt').value=owed;$('pmRef').value='';$('pmDate').value=ymd(new Date());$('pmOv').classList.add('on');$('pmAmt').select()}
+function closePay(){$('pmOv').classList.remove('on')}
+function confirmPay(){const amount=Number($('pmAmt').value);if(!(amount>0))return toast('Enter an amount greater than zero.');if(amount>_max)return toast('That is more than the balance of '+fmt(_max)+'.');_ok({amount,method:$('pmMethod').value,ref:$('pmRef').value.trim(),date:$('pmDate').value||ymd(new Date())});closePay()}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closePay()});
+// ---- Shared edit form + delete confirmation ----
+const uid=(()=>{let n=1000;return()=>++n})();
+const METHODS=['Cash','M-Pesa','Bank transfer','Cheque'];
+let _form=null,_yes=null;
+// fields: [{k,label,type:'text'|'number'|'date'|'select',value,options,full}] -> onSave(values) returns an error string to keep the form open
+function openForm(title,sub,fields,onSave){_form={fields,onSave};$('fmTitle').textContent=title;$('fmSub').textContent=sub||'';
+  $('fmBody').innerHTML=fields.map(f=>{const t=f.type||'text',id='fm_'+f.k;
+    const input=t==='select'?`<select id="${id}">${f.options.map(o=>`<option${o===f.value?' selected':''}>${esc(o)}</option>`).join('')}</select>`
+      :`<input type="${t}" id="${id}" value="${esc(f.value)}"${t==='number'?' min="0" step="any"':''}>`;
+    return `<div class="fld${f.full?' full':''}"><label>${esc(f.label)}</label>${input}</div>`}).join('');
+  $('fmOv').classList.add('on');const first=$('fm_'+fields[0].k);first&&first.focus()}
+function closeForm(){$('fmOv').classList.remove('on');_form=null}
+function saveForm(){if(!_form)return;const v={};_form.fields.forEach(f=>{const el=$('fm_'+f.k);v[f.k]=f.type==='number'?Number(el.value):el.value.trim()});
+  const err=_form.onSave(v);if(err)return toast(err);closeForm()}
+function askConfirm(title,msgHtml,onYes){_yes=onYes;$('cfTitle').textContent=title;$('cfMsg').innerHTML=msgHtml;$('cfOv').classList.add('on')}
+function closeConfirm(){$('cfOv').classList.remove('on');_yes=null}
+function doConfirm(){const f=_yes;closeConfirm();if(f)f()}
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeForm();closeConfirm()}});
+const rowActs=(editFn,delFn,extra='')=>`<div class="rowacts">${extra}<button class="btn sm" onclick="event.stopPropagation();${editFn}">Edit</button><button class="btn sm del" onclick="event.stopPropagation();${delFn}">Delete</button></div>`;
+function tick(){const n=new Date();$('clockTime').textContent=n.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});$('clockDate').textContent=n.toLocaleDateString('en-US',{weekday:'short',day:'2-digit',month:'short',year:'numeric'})}
+tick();setInterval(tick,30000);
+
+
+// ---- DEMO DATA (replace with real data when wiring in — see notes) ----
+// Each credit sale: total, paid = amount paid at the till, so the debt created = total - paid.
+// Payments = rows from customer_payments.
+const CUS=[
+ {id:1,name:'Mary Wanjiru',phone:'0712 345 678',sales:[{date:dago(50),rc:'R-2201',total:8400,paid:2000},{date:dago(20),rc:'R-2310',total:3200,paid:0}],pays:[{date:dago(30),amt:2000,m:'M-Pesa',by:'Brian (Cashier)'},{date:dago(6),amt:1500,m:'Cash',by:'Brian (Cashier)'}]},
+ {id:2,name:'James Otieno',phone:'0722 908 114',sales:[{date:dago(12),rc:'R-2344',total:12500,paid:5000}],pays:[]},
+ {id:3,name:'Grace Achieng',phone:'0733 221 870',sales:[{date:dago(70),rc:'R-2105',total:4500,paid:0}],pays:[{date:dago(40),amt:4500,m:'M-Pesa',by:'Paul Mwangi'}]},
+ {id:4,name:'Hassan Mohamed',phone:'0701 664 205',sales:[{date:dago(41),rc:'R-2260',total:9800,paid:3000}],pays:[{date:dago(15),amt:2000,m:'Cash',by:'Brian (Cashier)'}]},
+ {id:5,name:'Peter Kamau',phone:'0745 100 392',sales:[{date:dago(3),rc:'R-2399',total:2400,paid:0}],pays:[]}
+];
+CUS.forEach(c=>{c.sales.forEach(s=>s.id=uid());c.pays.forEach(p=>p.id=uid())});
+const open=new Set();
+function calc(c){const debits=c.sales.map(s=>({date:s.date,amt:s.total-s.paid})).filter(d=>d.amt>0).sort((a,b)=>a.date.localeCompare(b.date));
+  const given=debits.reduce((a,d)=>a+d.amt,0),paid=c.pays.reduce((a,p)=>a+p.amt,0),bal=Math.max(given-paid,0);
+  let pool=paid,oldest=0;for(const d of debits){const left=d.amt-Math.min(pool,d.amt);pool-=Math.min(pool,d.amt);if(left>0){oldest=age(d.date);break}} // FIFO: payments clear the oldest debt first
+  const lp=c.sales.map(s=>s.date).sort().pop(),lpay=c.pays.map(p=>p.date).sort().pop();
+  return{c,given,paid,bal,oldest,lp,lpay,state:bal<=0?'clear':oldest>30?'overdue':'owing'}}
+const PILL={clear:['g','Cleared'],owing:['a','Owing'],overdue:['r','Overdue']};
+function rows(){const q=$('q').value.toLowerCase(),f=$('st').value,so=$('sort').value;
+  return CUS.map(calc).filter(r=>(r.c.name.toLowerCase().includes(q)||r.c.phone.includes(q))&&(f==='all'||r.state===f||(f==='owing'&&r.state==='overdue')))
+   .sort((a,b)=>so==='name'?a.c.name.localeCompare(b.c.name):so==='old'?b.oldest-a.oldest:b.bal-a.bal)}
+function statement(c){const e=[];c.sales.forEach(s=>e.push({k:'sale',id:s.id,date:s.date,t:`Credit sale ${esc(s.rc)} <span style="color:var(--ink-soft)">(total ${fmt(s.total)}${s.paid?', '+fmt(s.paid)+' paid at till':''})</span>`,dr:Math.max(s.total-s.paid,0),cr:0}));
+  c.pays.forEach(p=>e.push({k:'pay',id:p.id,date:p.date,t:`Payment received — ${esc(p.m)} <span style="color:var(--ink-soft)">· ${esc(p.by)}</span>`,dr:0,cr:p.amt}));
+  e.sort((a,b)=>a.date.localeCompare(b.date));let run=0;
+  return e.map(x=>{run+=x.dr-x.cr;const f=x.k==='sale'?['editSale','delSale']:['editPay','delPay'];
+    return `<tr><td>${fdate(x.date)}</td><td>${x.t}</td><td class="num red">${x.dr?fmt(x.dr):''}</td><td class="num grn">${x.cr?fmt(x.cr):''}</td><td class="num"><b>${fmt(run)}</b></td><td>${rowActs(`${f[0]}(${c.id},${x.id})`,`${f[1]}(${c.id},${x.id})`)}</td></tr>`}).join('')}
+function draw(){const R=rows(),T=k=>R.reduce((a,r)=>a+r[k],0),over=R.filter(r=>r.state==='overdue');
+  $('sBal').textContent=fmt(T('bal'));$('sBalSub').textContent=R.filter(r=>r.bal>0).length+' customers owe the shop';
+  $('sGiven').textContent=fmt(T('given'));$('sGivenSub').textContent=R.reduce((a,r)=>a+r.c.sales.length,0)+' credit sales';
+  $('sPaid').textContent=fmt(T('paid'));$('sRate').textContent=T('given')?Math.round(T('paid')/T('given')*100)+'% of credit recovered':'—';
+  $('sOver').textContent=fmt(over.reduce((a,r)=>a+r.bal,0));$('sOverSub').textContent=over.length+' customers past 30 days';$('badge').textContent=fmt(T('bal'))+' owed to the shop';
+  $('body').innerHTML=R.map(r=>{const [p,l]=PILL[r.state],o=open.has(r.c.id);
+    const main=`<tr class="main ${o?'open':''}" onclick="tog(${r.c.id})"><td class="nm"><span class="caret">▶</span>${esc(r.c.name)}<small>${esc(r.c.phone)}</small></td>
+      <td class="num">${r.c.sales.length}</td><td class="num">${fmt(r.given)}</td><td class="num grn">${fmt(r.paid)}</td><td class="num ${r.bal>0?'red':''}"><b>${fmt(r.bal)}</b></td>
+      <td>${r.lp?fdate(r.lp):'—'}</td><td>${r.lpay?fdate(r.lpay):'—'}</td><td>${r.bal>0?r.oldest+' days':'—'}</td><td><span class="pill ${p}">${l}</span></td>
+      <td>${rowActs(`editCus(${r.c.id})`,`delCus(${r.c.id})`,r.bal>0?`<button class="btn sm pri" onclick="event.stopPropagation();pay(${r.c.id})">Record Payment</button>`:'')}</td></tr>`;
+    return o?main+`<tr class="det"><td colspan="10"><div class="mono" style="font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:8px">Account statement — ${esc(r.c.name)}</div>
+      <table><thead><tr><th>Date</th><th>Details</th><th class="num">Debit (owed)</th><th class="num">Credit (paid)</th><th class="num">Running balance</th><th></th></tr></thead><tbody>${statement(r.c)}</tbody></table></td></tr>`:main}).join('')
+    +(R.length?`<tr class="tot"><td>Totals</td><td class="num">${R.reduce((a,r)=>a+r.c.sales.length,0)}</td><td class="num">${fmt(T('given'))}</td><td class="num grn">${fmt(T('paid'))}</td><td class="num red">${fmt(T('bal'))}</td><td colspan="5"></td></tr>`:`<tr><td colspan="10" class="empty">No customers match.</td></tr>`)}
+function tog(id){open.has(id)?open.delete(id):open.add(id);draw()}
+function pay(id){const c=CUS.find(x=>x.id===id);
+  openPay('Payment from '+c.name,c.phone,calc(c).bal,({amount,method,date})=>{c.pays.push({date,amt:amount,m:method,by:'You (Admin)'});open.add(id);draw();toast(fmt(amount)+' received from '+c.name+'.')})}
+const cusOf=id=>CUS.find(x=>x.id===id);
+function editCus(id){const c=cusOf(id);
+  openForm('Edit customer',c.name,[{k:'name',label:'Customer name',value:c.name,full:1},{k:'phone',label:'Phone',value:c.phone,full:1}],v=>{
+    if(!v.name)return 'Customer name is required.';c.name=v.name;c.phone=v.phone;draw();toast('Customer updated.')})}
+function delCus(id){const c=cusOf(id),b=calc(c).bal;
+  askConfirm('Delete customer?',`<b>${esc(c.name)}</b> and all ${c.sales.length} credit sale(s) and ${c.pays.length} payment(s) on this account will be removed.${b>0?` They still owe <b>${fmt(b)}</b>.`:''} This cannot be undone.`,
+    ()=>{CUS.splice(CUS.indexOf(c),1);open.delete(id);draw();toast(c.name+' deleted.')})}
+function editSale(cid,sid){const c=cusOf(cid),s=c.sales.find(x=>x.id===sid);
+  openForm('Edit credit sale',c.name,[{k:'date',label:'Date',type:'date',value:s.date},{k:'rc',label:'Receipt no.',value:s.rc},{k:'total',label:'Sale total (KSh)',type:'number',value:s.total},{k:'paid',label:'Paid at till (KSh)',type:'number',value:s.paid}],v=>{
+    if(!v.date)return 'Pick a date.';if(!(v.total>0))return 'Sale total must be greater than zero.';if(v.paid<0||v.paid>v.total)return 'Paid at till must be between 0 and the sale total.';
+    Object.assign(s,v);open.add(cid);draw();toast('Credit sale updated.')})}
+function delSale(cid,sid){const c=cusOf(cid),s=c.sales.find(x=>x.id===sid);
+  askConfirm('Delete credit sale?',`Credit sale <b>${esc(s.rc)}</b> (${fmt(s.total)}) for ${esc(c.name)} will be removed from the account. This cannot be undone.`,
+    ()=>{c.sales.splice(c.sales.indexOf(s),1);open.add(cid);draw();toast('Credit sale deleted.')})}
+function editPay(cid,pid){const c=cusOf(cid),p=c.pays.find(x=>x.id===pid);
+  openForm('Edit payment',c.name,[{k:'date',label:'Date',type:'date',value:p.date},{k:'amt',label:'Amount (KSh)',type:'number',value:p.amt},{k:'m',label:'Method',type:'select',value:p.m,options:METHODS.includes(p.m)?METHODS:[p.m,...METHODS]}],v=>{
+    if(!v.date)return 'Pick a date.';if(!(v.amt>0))return 'Enter an amount greater than zero.';
+    Object.assign(p,v);open.add(cid);draw();toast('Payment updated.')})}
+function delPay(cid,pid){const c=cusOf(cid),p=c.pays.find(x=>x.id===pid);
+  askConfirm('Delete payment?',`The ${fmt(p.amt)} ${esc(p.m)} payment from ${esc(c.name)} will be removed and their balance will go back up. This cannot be undone.`,
+    ()=>{c.pays.splice(c.pays.indexOf(p),1);open.add(cid);draw();toast('Payment deleted.')})}
+function exportCsv(){const out=[['Customer','Phone','Credit Given','Paid Back','Balance','Last Purchase','Last Payment','Oldest Unpaid (days)']];
+  rows().forEach(r=>out.push([r.c.name,r.c.phone,r.given,r.paid,r.bal,r.lp||'',r.lpay||'',r.bal>0?r.oldest:'']));csv('debtors-'+ymd(new Date())+'.csv',out)}
+draw();
+
+</script></body></html>

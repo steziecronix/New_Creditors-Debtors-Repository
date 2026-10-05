@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Paul Enterprises — Sign In</title>
+<link rel="stylesheet" href="./assets/fonts/fonts.css">
+<style>
+  :root{
+    --ink:#16233D; --ink-soft:#4B5568;
+    --stone:#E9EDF6; --stone-dim:#DCE3F1; --paper:#FCFDFF;
+    --brass:#A9812F; --brass-soft:#F4E9C9; --brass-deep:#7C5D20;
+    --indigo:#2A3F6B; --indigo-soft:#E3E8F2;
+    --forest:#1F6F5C; --forest-soft:#DCEEE7;
+    --clay:#9B4436; --clay-soft:#F1E1DA;
+    --teal:#1E7A82; --teal-soft:#DCEFEE;
+    --line:#C4CEE3;
+    --shadow: 0 10px 28px -14px rgba(22,35,61,0.22);
+    --shadow-lg: 0 20px 44px -18px rgba(22,35,61,0.28);
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(circle at 1px 1px, rgba(22,35,61,0.07) 1px, transparent 0) 0 0/24px 24px,
+      radial-gradient(ellipse 900px 560px at 8% -6%, rgba(42,63,107,0.18), transparent 62%),
+      radial-gradient(ellipse 900px 560px at 100% 8%, rgba(30,122,130,0.12), transparent 60%),
+      radial-gradient(ellipse 1000px 640px at 50% 110%, rgba(169,129,47,0.10), transparent 60%),
+      var(--stone);
+    background-attachment:fixed;
+    color:var(--ink); font-family:'Inter',sans-serif;
+    min-height:100vh; display:flex; align-items:center; justify-content:center;
+    -webkit-font-smoothing:antialiased; padding:24px;
+  }
+  button{font-family:inherit;cursor:pointer;}
+  button:active{transform:scale(0.97);}
+  ::selection{background:var(--brass-soft);}
+
+  .plate{position:relative;background:var(--paper);border:1px solid var(--line);box-shadow:var(--shadow);border-radius:3px;}
+  .plate::before,.plate::after,.plate .bl,.plate .br{content:"";position:absolute;width:15px;height:15px;border:2px solid var(--brass);pointer-events:none;}
+  .plate::before{top:-1px;left:-1px;border-right:none;border-bottom:none;}
+  .plate::after{top:-1px;right:-1px;border-left:none;border-bottom:none;}
+  .plate .bl{bottom:-1px;left:-1px;border-right:none;border-top:none;}
+  .plate .br{bottom:-1px;right:-1px;border-left:none;border-top:none;}
+  .plate.deep{box-shadow:var(--shadow-lg);}
+
+  .wrap{width:100%;max-width:430px;}
+  .brandhead{text-align:center;margin-bottom:22px;}
+  .brand-word1{font-family:'Titan One',cursive;font-size:27px;letter-spacing:.01em;color:var(--indigo);-webkit-text-stroke:.4px var(--indigo);}
+  .brand-word2{font-family:'Titan One',cursive;font-size:14px;letter-spacing:.04em;margin-top:6px;color:var(--forest);}
+  .brand-tag{margin-top:8px;font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-soft);}
+
+  .card{padding:26px 26px 24px;}
+  .eyebrow{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.13em;text-transform:uppercase;color:var(--ink-soft);text-align:center;margin-bottom:16px;}
+
+  /* ---- Role picker ---- */
+  .role-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .role-btn{padding:22px 14px 18px;border:1px solid var(--line);background:var(--stone);border-radius:3px;text-align:center;transition:.15s;min-height:44px;}
+  .role-btn:hover{border-color:var(--brass);background:var(--brass-soft);}
+  .role-icon{width:46px;height:46px;border-radius:50%;background:var(--paper);border:2px solid var(--brass);display:flex;align-items:center;justify-content:center;font-size:20px;margin:0 auto 12px;}
+  .role-name{font-family:'Fraunces',serif;font-weight:700;font-size:15px;}
+  .role-sub{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft);margin-top:4px;}
+
+  /* ---- Login forms ---- */
+  .form-view{display:none;}
+  .form-view.on{display:block;}
+  .back-link{display:inline-flex;align-items:center;gap:6px;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft);border:none;background:none;margin-bottom:16px;padding:0;}
+  .back-link:hover{color:var(--ink);}
+  .form-title{display:flex;align-items:center;gap:10px;margin-bottom:4px;}
+  .form-title .fi{width:34px;height:34px;border-radius:50%;background:var(--indigo-soft);color:var(--indigo);display:flex;align-items:center;justify-content:center;font-size:16px;flex:0 0 auto;}
+  .form-title h2{font-family:'Fraunces',serif;font-weight:700;font-size:18px;margin:0;}
+  .form-sub{font-size:12px;color:var(--ink-soft);margin:2px 0 18px;}
+
+  .form-field{margin-bottom:13px;}
+  .form-field label{display:block;font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:6px;}
+  .form-field input, .form-field select{width:100%;padding:12px 12px;border:1px solid var(--line);background:var(--stone);border-radius:2px;font-size:13.5px;color:var(--ink);font-family:'Inter',sans-serif;min-height:44px;}
+  .form-field input:focus, .form-field select:focus{outline:none;border-color:var(--teal);background:var(--paper);}
+
+  /* PIN dots */
+  .pin-display{display:flex;justify-content:center;gap:14px;margin:6px 0 18px;}
+  .pin-dot{width:16px;height:16px;border-radius:50%;border:2px solid var(--line);background:var(--stone);}
+  .pin-dot.filled{background:var(--brass);border-color:var(--brass);}
+  .pinpad{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;}
+  .pinpad button{padding:15px 0;border:1px solid var(--line);background:var(--stone);border-radius:3px;font-family:'IBM Plex Mono',monospace;font-size:16px;font-weight:600;color:var(--ink);min-height:48px;}
+  .pinpad button:hover{border-color:var(--brass);background:var(--brass-soft);}
+  .pinpad button.wide{grid-column:span 1;font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-soft);}
+
+  .submit-btn{width:100%;margin-top:8px;padding:13px;background:var(--forest);border:1px solid var(--forest);color:#fff;font-family:'IBM Plex Mono',monospace;font-size:11.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;border-radius:2px;min-height:48px;}
+  .submit-btn:hover{background:#175E4D;}
+  .submit-btn:disabled{background:var(--stone-dim);border-color:var(--stone-dim);color:var(--ink-soft);}
+
+  .error-msg{font-size:11.5px;color:var(--clay);margin-top:10px;text-align:center;min-height:14px;}
+  .hint{font-size:10.5px;color:var(--ink-soft);text-align:center;margin-top:14px;line-height:1.5;font-family:'IBM Plex Mono',monospace;letter-spacing:.02em;}
+  .hint b{color:var(--brass-deep);}
+
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--ink);color:var(--paper);padding:12px 22px;border-radius:3px;font-family:'IBM Plex Mono',monospace;font-size:11.5px;opacity:0;pointer-events:none;transition:.25s;z-index:1200;border:1px solid var(--brass);}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="brandhead">
+    <div class="brand-word1">PAUL ENTERPRISES</div>
+    <div class="brand-word2">POINT OF SALE</div>
+    <div class="brand-tag">Sign in to continue</div>
+  </div>
+
+  <div class="plate card deep">
+    <span class="bl"></span><span class="br"></span>
+
+    <!-- ---- Step 1: role picker ---- -->
+    <div class="form-view on" id="viewRoles">
+      <div class="eyebrow">Who's signing in?</div>
+      <div class="role-grid">
+        <button class="role-btn" onclick="showForm('employee')">
+          <div class="role-icon">🧾</div>
+          <div class="role-name">Employee</div>
+          <div class="role-sub">Sales terminal</div>
+        </button>
+        <button class="role-btn" onclick="showForm('owner')">
+          <div class="role-icon">🔑</div>
+          <div class="role-name">Owner</div>
+          <div class="role-sub">Full dashboard</div>
+        </button>
+      </div>
+      <div class="hint">Employees sign in with a 4-digit PIN.<br>Owners sign in with a username and password.</div>
+    </div>
+
+    <!-- ---- Step 2a: employee PIN login ---- -->
+    <div class="form-view" id="viewEmployee">
+      <button class="back-link" onclick="showRoles()">← Back</button>
+      <div class="form-title"><span class="fi">🧾</span><h2>Employee Sign In</h2></div>
+      <div class="form-sub">Select your name and enter your 4-digit PIN.</div>
+      <div class="form-field">
+        <label>Staff Member</label>
+        <select id="empName"><option value="">Loading staff…</option></select>
+      </div>
+      <div class="pin-display" id="empPinDots">
+        <span class="pin-dot"></span><span class="pin-dot"></span><span class="pin-dot"></span><span class="pin-dot"></span>
+      </div>
+      <div class="pinpad">
+        <button onclick="pinPress('1')">1</button><button onclick="pinPress('2')">2</button><button onclick="pinPress('3')">3</button>
+        <button onclick="pinPress('4')">4</button><button onclick="pinPress('5')">5</button><button onclick="pinPress('6')">6</button>
+        <button onclick="pinPress('7')">7</button><button onclick="pinPress('8')">8</button><button onclick="pinPress('9')">9</button>
+        <button class="wide" onclick="pinClear()">Clear</button><button onclick="pinPress('0')">0</button><button class="wide" onclick="pinBackspace()">⌫</button>
+      </div>
+      <button class="submit-btn" id="empSubmit" onclick="submitEmployee()" disabled>Sign In</button>
+      <div class="error-msg" id="empError"></div>
+    </div>
+
+    <!-- ---- Step 2b: owner login ---- -->
+    <div class="form-view" id="viewOwner">
+      <button class="back-link" onclick="showRoles()">← Back</button>
+      <div class="form-title"><span class="fi">🔑</span><h2>Owner Sign In</h2></div>
+      <div class="form-sub">Enter your username and password to open the dashboard.</div>
+      <div class="form-field"><label>Username</label><input type="text" id="ownUsername" placeholder="e.g. paul.mwangi"></div>
+      <div class="form-field"><label>Password</label><input type="password" id="ownPassword" placeholder="••••••••" onkeydown="if(event.key==='Enter')submitOwner()"></div>
+      <button class="submit-btn" id="ownSubmit" onclick="submitOwner()">Sign In</button>
+      <div class="error-msg" id="ownError"></div>
+    </div>
+
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  let pin = '';
+  let employees = []; // [{id, name, branch_name}] — loaded from the DB via IPC, not hardcoded
+
+  // ---- If a session already exists (app was left open / restarted quickly),
+  // skip straight to the right landing page instead of showing the login form. ----
+  (async function checkExistingSession(){
+    try{
+      const session = await window.pos.auth.currentSession();
+      if(session){
+        window.location.href = session.role === 'admin' ? 'owner-dashboard.html' : 'employee-landing.html';
+      }
+    }catch(err){
+      console.error('currentSession check failed', err);
+    }
+  })();
+
+  // ---- Load the real, active cashier list for the employee dropdown ----
+  async function loadEmployees(){
+    const sel = document.getElementById('empName');
+    try{
+      employees = await window.pos.auth.listEmployees();
+      sel.innerHTML = employees.length
+        ? employees.map(e => `<option value="${e.id}">${e.name} — ${e.branch_name || 'Unassigned'}</option>`).join('')
+        : `<option value="">No active cashiers set up yet</option>`;
+    }catch(err){
+      sel.innerHTML = `<option value="">Could not load staff list</option>`;
+      showToast('Could not load the staff list: ' + err.message);
+    }
+  }
+  loadEmployees();
+
+  function showForm(which){
+    document.getElementById('viewRoles').classList.remove('on');
+    document.getElementById('viewEmployee').classList.remove('on');
+    document.getElementById('viewOwner').classList.remove('on');
+    if(which==='employee'){ pin=''; renderPinDots(); document.getElementById('viewEmployee').classList.add('on'); }
+    if(which==='owner'){ document.getElementById('viewOwner').classList.add('on'); }
+  }
+  function showRoles(){
+    document.getElementById('viewEmployee').classList.remove('on');
+    document.getElementById('viewOwner').classList.remove('on');
+    document.getElementById('viewRoles').classList.add('on');
+    document.getElementById('empError').textContent = '';
+    document.getElementById('ownError').textContent = '';
+  }
+
+  function pinPress(d){
+    if(pin.length>=4) return;
+    pin += d;
+    renderPinDots();
+  }
+  function pinBackspace(){ pin = pin.slice(0,-1); renderPinDots(); }
+  function pinClear(){ pin=''; renderPinDots(); }
+  function renderPinDots(){
+    document.querySelectorAll('#empPinDots .pin-dot').forEach((dot,i) => dot.classList.toggle('filled', i < pin.length));
+    document.getElementById('empSubmit').disabled = pin.length !== 4;
+  }
+
+  async function submitEmployee(){
+    if(pin.length !== 4) return;
+    const userId = Number(document.getElementById('empName').value);
+    const errEl = document.getElementById('empError');
+    const btn = document.getElementById('empSubmit');
+    if(!userId){ errEl.textContent = 'Select a staff member first.'; return; }
+
+    errEl.textContent = '';
+    btn.disabled = true;
+    try{
+      const session = await window.pos.auth.loginEmployee(userId, pin);
+      showToast('Signed in as ' + session.name + '…');
+      setTimeout(() => window.location.href = 'employee-landing.html', 500);
+    }catch(err){
+      errEl.textContent = err.message || 'Incorrect PIN.';
+      pin = ''; renderPinDots();
+      btn.disabled = pin.length !== 4;
+    }
+  }
+
+  async function submitOwner(){
+    const u = document.getElementById('ownUsername').value.trim();
+    const p = document.getElementById('ownPassword').value.trim();
+    const errEl = document.getElementById('ownError');
+    const btn = document.getElementById('ownSubmit');
+    if(!u || !p){
+      errEl.textContent = 'Enter both a username and password.';
+      return;
+    }
+    errEl.textContent = '';
+    btn.disabled = true;
+    try{
+      const session = await window.pos.auth.loginOwner(u, p);
+      showToast('Signed in as ' + session.name + '…');
+      setTimeout(() => window.location.href = 'owner-dashboard.html', 500);
+    }catch(err){
+      errEl.textContent = err.message || 'Incorrect username or password.';
+    }finally{
+      btn.disabled = false;
+    }
+  }
+
+  let toastTimer;
+  function showToast(msg){
+    const t = document.getElementById('toast');
+    t.textContent = msg; t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(()=>t.classList.remove('show'), 2500);
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,879 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Paul Enterprises — Sales Terminal</title>
+<link rel="stylesheet" href="./assets/fonts/fonts.css">
+<style>
+  :root{
+    --ink:#16233D; --ink-soft:#4B5568;
+    --stone:#E9EDF6; --stone-dim:#DCE3F1; --paper:#FCFDFF;
+    --brass:#A9812F; --brass-soft:#F4E9C9; --brass-deep:#7C5D20;
+    --indigo:#2A3F6B; --indigo-soft:#E3E8F2;
+    --forest:#1F6F5C; --forest-soft:#DCEEE7;
+    --clay:#9B4436; --clay-soft:#F1E1DA;
+    --teal:#1E7A82; --teal-soft:#DCEFEE;
+    --plum:#6E4A94; --plum-soft:#EBE3F2;
+    --sky-soft:#E4E9F3; --line:#C4CEE3;
+    --shadow: 0 10px 28px -14px rgba(22,35,61,0.22);
+    --shadow-lg: 0 20px 44px -18px rgba(22,35,61,0.28);
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(circle at 1px 1px, rgba(22,35,61,0.07) 1px, transparent 0) 0 0/24px 24px,
+      radial-gradient(ellipse 1000px 640px at 6% -4%, rgba(42,63,107,0.16), transparent 62%),
+      radial-gradient(ellipse 1000px 640px at 102% 4%, rgba(30,122,130,0.10), transparent 60%),
+      radial-gradient(ellipse 1200px 500px at 50% 100%, rgba(169,129,47,0.08), transparent 65%),
+      var(--stone);
+    background-attachment:fixed;
+    color:var(--ink); font-family:'Inter',sans-serif;
+    height:100vh; overflow:hidden; -webkit-font-smoothing:antialiased;
+    touch-action:manipulation; -webkit-user-select:none; user-select:none;
+    font-size:14px;
+  }
+  input, textarea{-webkit-user-select:text;user-select:text;}
+  ::selection{background:var(--brass-soft);}
+  a{color:inherit;text-decoration:none;}
+  button{font-family:inherit;cursor:pointer;}
+  button:active, .p-card:active, .qty-btn:active, .pay-opt:active{transform:scale(0.96);}
+
+  /* ===== Plate motif ===== */
+  .plate{position:relative;background:var(--paper);border:1px solid var(--line);box-shadow:var(--shadow);border-radius:3px;}
+  .plate::before,.plate::after,.plate .bl,.plate .br{content:"";position:absolute;width:14px;height:14px;border:2px solid var(--brass);pointer-events:none;}
+  .plate::before{top:-1px;left:-1px;border-right:none;border-bottom:none;}
+  .plate::after{top:-1px;right:-1px;border-left:none;border-bottom:none;}
+  .plate .bl{bottom:-1px;left:-1px;border-right:none;border-top:none;}
+  .plate .br{bottom:-1px;right:-1px;border-left:none;border-top:none;}
+  .plate.deep{box-shadow:var(--shadow-lg);}
+
+  .eyebrow{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.13em;text-transform:uppercase;color:var(--ink-soft);}
+
+  /* ===== Shell / layout ===== */
+  .shell{height:100vh;display:flex;flex-direction:column;max-width:1600px;margin:0 auto;padding:16px 18px;gap:14px;transition:filter .2s ease;}
+  .shell.blurred{filter:blur(6px) saturate(0.9);pointer-events:none;}
+
+  /* ---- Topbar ---- */
+  .topbar{display:flex;align-items:stretch;gap:14px;flex:0 0 auto;}
+  .brandplate{flex:0 0 250px;padding:12px 20px;display:flex;flex-direction:column;justify-content:center;background:var(--paper);}
+  .brand-word1{font-family:'Titan One',cursive;font-size:21px;letter-spacing:.01em;line-height:1;color:var(--indigo);-webkit-text-stroke:.4px var(--indigo);}
+  .brand-word2{font-family:'Titan One',cursive;font-size:12px;letter-spacing:.03em;margin-top:5px;color:var(--forest);}
+  .brand-tag{margin-top:6px;font-family:'IBM Plex Mono',monospace;font-size:8.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft);}
+
+  .shiftplate{flex:1;padding:12px 22px;display:flex;align-items:center;justify-content:space-between;gap:16px;}
+  .shift-who{display:flex;align-items:center;gap:12px;}
+  .shift-avatar{width:38px;height:38px;border-radius:50%;background:var(--indigo-soft);color:var(--indigo);display:flex;align-items:center;justify-content:center;font-family:'Fraunces',serif;font-weight:700;font-size:15px;border:2px solid var(--brass);}
+  .shift-name{font-family:'Fraunces',serif;font-weight:700;font-size:15px;}
+  .shift-role{font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--brass-deep);}
+  .shift-status{display:flex;align-items:center;gap:10px;}
+  .shift-dot{width:8px;height:8px;border-radius:50%;background:var(--forest);box-shadow:0 0 0 3px var(--forest-soft);}
+  .shift-time{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--ink-soft);}
+  .shift-btn{padding:9px 16px;background:transparent;border:1px solid var(--clay);color:var(--clay);font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase;border-radius:2px;}
+  .shift-btn:hover{background:var(--clay);color:#fff;}
+  .shift-btn.logout-btn2:hover{background:var(--ink);color:#fff;}
+
+  .clockplate{flex:0 0 150px;padding:12px 16px;display:flex;flex-direction:column;justify-content:center;align-items:flex-end;gap:3px;background:var(--ink);color:var(--paper);border:1px solid var(--ink);}
+  .clockplate::before,.clockplate::after,.clockplate .bl,.clockplate .br{border-color:var(--brass);}
+  .clock-time{font-family:'IBM Plex Mono',monospace;font-size:17px;font-weight:600;}
+  .clock-date{font-family:'IBM Plex Mono',monospace;font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--brass-soft);}
+
+  /* ---- Tab switcher (this IS the employee's whole nav) ---- */
+  .tabband{display:flex;align-items:center;justify-content:space-between;flex:0 0 auto;gap:14px;flex-wrap:wrap;}
+  .tabs{display:flex;gap:8px;}
+  .tab-btn{padding:11px 22px;border:1px solid var(--line);background:var(--paper);color:var(--ink-soft);font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase;border-radius:3px;font-weight:600;min-height:44px;}
+  .tab-btn.on{background:var(--ink);border-color:var(--ink);color:var(--paper);}
+  .scope-note{font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.06em;color:var(--ink-soft);text-transform:uppercase;}
+  .scope-note b{color:var(--brass-deep);}
+
+  /* ---- Main working area ---- */
+  .workarea{flex:1;min-height:0;}
+  .view{display:none;height:100%;}
+  .view.on{display:flex;gap:14px;}
+
+  /* ===== SALE VIEW ===== */
+  .sale-left{flex:1.5;display:flex;flex-direction:column;gap:12px;min-width:0;}
+  .search-row{display:flex;gap:10px;flex:0 0 auto;}
+  .search-plate{flex:1;padding:0 16px;display:flex;align-items:center;gap:10px;}
+  .search-plate input{flex:1;border:none;background:transparent;outline:none;padding:13px 0;font-size:14px;font-family:'Inter',sans-serif;color:var(--ink);}
+  .search-plate input::placeholder{color:#9AA3AF;}
+  .cat-chip{padding:0 16px;display:flex;align-items:center;font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft);border:1px solid var(--line);background:var(--paper);border-radius:3px;min-height:44px;white-space:nowrap;}
+  .cat-chip.on{background:var(--teal);border-color:var(--teal);color:#fff;}
+  .cat-row{display:flex;gap:8px;overflow-x:auto;flex:0 0 auto;padding-bottom:2px;}
+
+  .product-plate{flex:1;padding:16px;overflow-y:auto;min-height:0;}
+  .p-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(128px,1fr));gap:10px;}
+  .p-card{position:relative;padding:14px 12px 12px;border:1px solid var(--line);border-radius:3px;background:var(--stone);cursor:pointer;transition:.12s;min-height:118px;}
+  .p-card:hover{border-color:var(--brass);background:var(--brass-soft);}
+  .p-icon{width:36px;height:36px;border-radius:8px;background:var(--paper);display:flex;align-items:center;justify-content:center;font-size:19px;margin-bottom:8px;border:1px solid var(--line);}
+  .p-name{font-weight:700;font-size:12.5px;line-height:1.25;margin-bottom:3px;}
+  .p-cat{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.05em;}
+  .p-price{font-family:'IBM Plex Mono',monospace;font-weight:700;color:var(--indigo);margin-top:8px;font-size:14px;}
+  .p-vat{position:absolute;top:10px;right:10px;font-family:'IBM Plex Mono',monospace;font-size:8px;letter-spacing:.05em;padding:2px 6px;border-radius:10px;background:var(--forest-soft);color:var(--forest);}
+  .p-vat.zero{background:var(--stone-dim);color:var(--ink-soft);}
+  .p-stock{font-family:'IBM Plex Mono',monospace;font-size:9.5px;font-weight:600;margin-top:4px;letter-spacing:.02em;}
+  .p-stock.stock-ok{color:var(--forest);}
+  .p-stock.stock-low{color:var(--brass-deep);}
+  .p-stock.stock-out{color:var(--clay);}
+  .p-card.p-disabled{opacity:.55;cursor:not-allowed;}
+  .p-card.p-disabled:hover{border-color:var(--line);background:var(--stone);}
+
+  /* ---- Cart panel ---- */
+  .cart-panel{flex:1;display:flex;flex-direction:column;min-width:320px;max-width:380px;}
+  .cart-plate{flex:1;display:flex;flex-direction:column;padding:16px 16px 14px;min-height:0;}
+  .cart-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+  .cart-head h3{font-family:'Fraunces',serif;font-weight:700;font-size:16px;margin:0;display:flex;align-items:center;gap:8px;}
+  .cart-head h3 .sw{width:6px;height:16px;background:var(--brass);border-radius:1px;display:inline-block;}
+  .cart-count{font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:var(--ink-soft);}
+  .cart-items{flex:1;overflow-y:auto;min-height:80px;border-top:1px solid var(--line);}
+  .cart-empty{padding:30px 10px;text-align:center;color:var(--ink-soft);font-size:12px;}
+  .cart-row{display:flex;align-items:center;gap:8px;padding:9px 0;border-bottom:1px solid var(--stone-dim);}
+  .cart-row .ci-name{flex:1;min-width:0;}
+  .cart-row .ci-name b{display:block;font-size:12px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .cart-row .ci-name small{font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:var(--ink-soft);}
+  .qty-ctrl{display:flex;align-items:center;gap:4px;}
+  .qty-btn{width:22px;height:22px;border-radius:4px;border:1px solid var(--line);background:var(--stone);color:var(--ink);font-size:13px;line-height:1;display:flex;align-items:center;justify-content:center;font-weight:700;}
+  .qty-val{width:20px;text-align:center;font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:600;}
+  .ci-line{width:64px;text-align:right;font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:700;}
+  .ci-remove{width:20px;height:20px;border-radius:50%;border:none;background:var(--clay-soft);color:var(--clay);font-size:12px;display:flex;align-items:center;justify-content:center;flex:0 0 auto;}
+
+  .cart-totals{border-top:1px solid var(--line);padding-top:10px;margin-top:8px;}
+  .t-row{display:flex;justify-content:space-between;font-size:12px;padding:3px 0;color:var(--ink-soft);}
+  .t-row.grand{font-family:'Fraunces',serif;font-weight:800;font-size:19px;color:var(--ink);padding-top:8px;border-top:1px dashed var(--line);margin-top:6px;}
+  .t-row.grand span:last-child{color:var(--indigo);}
+
+  .discount-row{display:flex;align-items:center;gap:8px;margin-top:8px;}
+  .discount-row label{font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft);white-space:nowrap;}
+  .discount-row input{flex:1;padding:7px 9px;border:1px solid var(--line);background:var(--stone);border-radius:2px;font-size:12px;font-family:'IBM Plex Mono',monospace;}
+
+  .pay-methods{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:12px;}
+  .pay-opt{padding:11px 6px;border:1px solid var(--line);background:var(--stone);border-radius:3px;font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-soft);text-align:center;min-height:44px;font-weight:600;}
+  .pay-opt.on{background:var(--teal);border-color:var(--teal);color:#fff;}
+
+  .cart-actions{display:flex;gap:8px;margin-top:12px;}
+  .hold-btn{flex:0 0 auto;padding:12px 14px;background:transparent;border:1px solid var(--ink);color:var(--ink);font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;border-radius:2px;min-height:46px;}
+  .hold-btn:hover{background:var(--ink);color:#fff;}
+  .checkout-btn{flex:1;padding:12px 14px;background:var(--forest);border:1px solid var(--forest);color:#fff;font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;border-radius:2px;min-height:46px;}
+  .checkout-btn:hover{background:#175E4D;}
+  .checkout-btn:disabled{background:var(--stone-dim);border-color:var(--stone-dim);color:var(--ink-soft);}
+
+  /* ===== PURCHASE / ADD STOCK VIEW ===== */
+  .purchase-grid{flex:1;display:flex;gap:14px;min-height:0;}
+  .form-plate{flex:0 0 340px;padding:18px 18px 16px;overflow-y:auto;}
+  .form-plate h3{font-family:'Fraunces',serif;font-weight:700;font-size:16px;margin:0 0 14px;display:flex;align-items:center;gap:8px;}
+  .form-plate h3 .sw{width:6px;height:16px;background:var(--brass);border-radius:1px;display:inline-block;}
+  .form-field{margin-bottom:11px;}
+  .form-field label{display:block;font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:5px;}
+  .form-field input, .form-field select{width:100%;padding:10px 11px;border:1px solid var(--line);background:var(--stone);border-radius:2px;font-size:13px;color:var(--ink);font-family:'Inter',sans-serif;min-height:40px;}
+  .form-field input:focus, .form-field select:focus{outline:none;border-color:var(--teal);background:var(--paper);}
+  .form-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .add-line-btn{width:100%;padding:11px;background:var(--indigo);border:1px solid var(--indigo);color:#fff;font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;border-radius:2px;margin-top:4px;min-height:44px;}
+  .add-line-btn:hover{background:#1F3155;}
+
+  .batch-plate{flex:1;padding:18px 20px 16px;display:flex;flex-direction:column;min-height:0;}
+  .batch-plate h3{font-family:'Fraunces',serif;font-weight:700;font-size:16px;margin:0 0 4px;}
+  .batch-sub{font-size:11.5px;color:var(--ink-soft);margin-bottom:12px;}
+  .batch-list{flex:1;overflow-y:auto;border-top:1px solid var(--line);}
+  table.batch-table{width:100%;border-collapse:collapse;}
+  table.batch-table th{text-align:left;font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft);padding:10px 8px 8px;border-bottom:1px solid var(--line);font-weight:600;position:sticky;top:0;background:var(--paper);}
+  table.batch-table td{padding:11px 8px;border-bottom:1px solid var(--stone-dim);font-size:12.5px;}
+  table.batch-table tr:last-child td{border-bottom:none;}
+  .batch-empty{padding:40px 10px;text-align:center;color:var(--ink-soft);font-size:12px;}
+  .row-remove{width:22px;height:22px;border-radius:50%;border:none;background:var(--clay-soft);color:var(--clay);font-size:12px;}
+  .batch-footer{border-top:1px solid var(--line);padding-top:12px;margin-top:10px;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;}
+  .batch-total{font-family:'Fraunces',serif;font-weight:800;font-size:20px;}
+  .batch-total span{color:var(--indigo);}
+  .save-purchase-btn{padding:12px 26px;background:var(--forest);border:1px solid var(--forest);color:#fff;font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;border-radius:2px;min-height:46px;}
+  .save-purchase-btn:hover{background:#175E4D;}
+
+  /* ===== Modal (receipt) ===== */
+  .modal-overlay{position:fixed;inset:0;background:rgba(22,35,61,0.55);display:none;align-items:center;justify-content:center;z-index:999;padding:20px;}
+  .modal-overlay.open{display:flex;}
+  .receipt-box{background:var(--paper);width:100%;max-width:380px;max-height:90vh;overflow-y:auto;padding:22px 22px 18px;position:relative;}
+  .receipt-head{text-align:center;border-bottom:1px dashed var(--line);padding-bottom:14px;margin-bottom:14px;}
+  .receipt-head .rbrand{font-family:'Titan One',cursive;font-size:16px;color:var(--indigo);}
+  .receipt-head .rsub{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--ink-soft);letter-spacing:.08em;text-transform:uppercase;margin-top:4px;}
+  .receipt-head .rno{font-family:'IBM Plex Mono',monospace;font-size:11px;margin-top:8px;color:var(--ink);}
+  .receipt-items{border-bottom:1px dashed var(--line);padding-bottom:10px;margin-bottom:10px;}
+  .r-item{display:flex;justify-content:space-between;font-size:12px;padding:4px 0;}
+  .r-item .rn{flex:1;}
+  .r-item small{display:block;color:var(--ink-soft);font-family:'IBM Plex Mono',monospace;font-size:9.5px;margin-top:1px;}
+  .receipt-totals .t-row{font-size:12.5px;}
+  .receipt-totals .t-row.grand{font-size:18px;}
+  .receipt-footer{text-align:center;margin-top:16px;font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--ink-soft);letter-spacing:.04em;}
+  .receipt-actions{display:flex;gap:8px;margin-top:16px;}
+  .receipt-actions button{flex:1;padding:11px;font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;border-radius:2px;min-height:44px;}
+  .print-btn{background:var(--ink);border:1px solid var(--ink);color:#fff;}
+  .new-sale-btn{background:transparent;border:1px solid var(--brass);color:var(--brass-deep);}
+  .new-sale-btn:hover{background:var(--brass-soft);}
+
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--ink);color:var(--paper);padding:12px 22px;border-radius:3px;font-family:'IBM Plex Mono',monospace;font-size:11.5px;letter-spacing:.03em;opacity:0;pointer-events:none;transition:.25s;z-index:1200;border:1px solid var(--brass);}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+  @media (max-width:900px){
+    .view.on{flex-direction:column;}
+    .cart-panel{max-width:none;}
+    .purchase-grid{flex-direction:column;}
+    .form-plate{flex:0 0 auto;}
+  }
+</style>
+</head>
+<body>
+<div class="shell" id="shell">
+
+  <!-- ===== Top bar ===== -->
+  <div class="topbar">
+    <div class="plate brandplate">
+      <span class="bl"></span><span class="br"></span>
+      <div class="brand-word1">PAUL ENTERPRISES</div>
+      <div class="brand-word2">POINT OF SALE</div>
+      <div class="brand-tag">Sales Terminal</div>
+    </div>
+    <div class="plate shiftplate">
+      <span class="bl"></span><span class="br"></span>
+      <div class="shift-who">
+        <div class="shift-avatar">GK</div>
+        <div>
+          <div class="shift-name">Grace Kamau</div>
+          <div class="shift-role">Cashier · Main Branch</div>
+        </div>
+      </div>
+      <div class="shift-status">
+        <span class="shift-dot"></span>
+        <span class="shift-time" id="shiftTime">On shift · 3h 12m</span>
+        <button class="shift-btn" id="shiftBtn" onclick="toggleShift()">Clock Out</button>
+        <button class="shift-btn logout-btn2" onclick="logout()" style="border-color:var(--ink);color:var(--ink);">Logout</button>
+      </div>
+    </div>
+    <div class="plate clockplate">
+      <span class="bl"></span><span class="br"></span>
+      <div class="clock-time" id="clockTime">10:42 AM</div>
+      <div class="clock-date" id="clockDate">Sun, 30 Aug 2026</div>
+    </div>
+  </div>
+
+  <!-- ===== Tab switcher — the employee's entire navigation ===== -->
+  <div class="tabband">
+    <div class="tabs">
+      <button class="tab-btn on" id="tabBtnSale" onclick="showView('sale')">New Sale</button>
+      <button class="tab-btn" id="tabBtnPurchase" onclick="showView('purchase')">Add Stock / Purchase</button>
+    </div>
+    <div class="scope-note">Cashier access &middot; <b>sales &amp; stock entry only</b> &middot; reports and settings are managed by the owner</div>
+  </div>
+
+  <!-- ===== Work area ===== -->
+  <div class="workarea">
+
+    <!-- ---------- SALE VIEW ---------- -->
+    <div class="view on" id="viewSale">
+      <div class="sale-left">
+        <div class="search-row">
+          <div class="plate search-plate">
+            <span class="bl"></span><span class="br"></span>
+            <span style="color:var(--ink-soft);">🔍</span>
+            <input type="text" id="productSearch" placeholder="Search by product name or SKU…" oninput="renderProducts()">
+          </div>
+        </div>
+        <div class="cat-row" id="catRow"></div>
+        <div class="plate product-plate">
+          <span class="bl"></span><span class="br"></span>
+          <div class="p-grid" id="productGrid"></div>
+        </div>
+      </div>
+
+      <div class="cart-panel">
+        <div class="plate cart-plate deep">
+          <span class="bl"></span><span class="br"></span>
+          <div class="cart-head">
+            <h3><span class="sw"></span>Current Sale</h3>
+            <span class="cart-count" id="cartCount">0 items</span>
+          </div>
+          <div class="cart-items" id="cartItems">
+            <div class="cart-empty">Tap a product to add it to the sale.</div>
+          </div>
+          <div class="discount-row">
+            <label>Discount (KSh)</label>
+            <input type="number" id="discountInput" placeholder="0" min="0" oninput="renderCart()">
+          </div>
+          <div class="cart-totals">
+            <div class="t-row"><span>Subtotal</span><span id="sumSubtotal">KSh 0</span></div>
+            <div class="t-row"><span>VAT</span><span id="sumVat">KSh 0</span></div>
+            <div class="t-row"><span>Discount</span><span id="sumDiscount">− KSh 0</span></div>
+            <div class="t-row grand"><span>Total</span><span id="sumTotal">KSh 0</span></div>
+          </div>
+          <div class="pay-methods" id="payMethods">
+            <button class="pay-opt on" data-method="Cash" onclick="setPayMethod('Cash')">Cash</button>
+            <button class="pay-opt" data-method="M-Pesa" onclick="setPayMethod('M-Pesa')">M-Pesa</button>
+            <button class="pay-opt" data-method="Card" onclick="setPayMethod('Card')">Card</button>
+            <button class="pay-opt" data-method="Credit" onclick="setPayMethod('Credit')">Credit</button>
+          </div>
+          <div class="cart-actions">
+            <button class="hold-btn" onclick="holdSale()">Hold</button>
+            <button class="checkout-btn" id="checkoutBtn" onclick="completeSale()" disabled>Complete Sale</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ---------- PURCHASE / ADD STOCK VIEW ---------- -->
+    <div class="view" id="viewPurchase">
+      <div class="purchase-grid">
+        <div class="plate form-plate">
+          <span class="bl"></span><span class="br"></span>
+          <h3><span class="sw"></span>Record Goods Received</h3>
+          <div class="form-field">
+            <label>Supplier</label>
+            <select id="pSupplier" onchange="handleSupplierSelect()">
+              <option value="">Loading suppliers…</option>
+            </select>
+          </div>
+          <div class="form-field">
+            <label>Product</label>
+            <select id="pProduct"></select>
+          </div>
+          <div class="form-grid-2">
+            <div class="form-field">
+              <label>Quantity</label>
+              <input type="number" id="pQty" placeholder="0" min="1">
+            </div>
+            <div class="form-field">
+              <label>Cost Price (each)</label>
+              <input type="number" id="pCost" placeholder="0.00" min="0">
+            </div>
+          </div>
+          <div class="form-grid-2">
+            <div class="form-field">
+              <label>Date</label>
+              <input type="date" id="pDate">
+            </div>
+            <div class="form-field">
+              <label>Invoice Ref.</label>
+              <input type="text" id="pInvoice" placeholder="e.g. INV-2201">
+            </div>
+          </div>
+          <button class="add-line-btn" onclick="addBatchLine()">+ Add to Purchase</button>
+        </div>
+
+        <div class="plate batch-plate">
+          <span class="bl"></span><span class="br"></span>
+          <h3>Purchase Batch</h3>
+          <div class="batch-sub">Items added here increase stock the moment you save the purchase.</div>
+          <div class="batch-list" id="batchList">
+            <div class="batch-empty">No items added yet — fill the form on the left and add each product to this batch.</div>
+          </div>
+          <div class="batch-footer">
+            <div class="batch-total">Batch total: <span id="batchTotal">KSh 0</span></div>
+            <button class="save-purchase-btn" id="savePurchaseBtn" onclick="savePurchase()" disabled>Save Purchase &amp; Update Stock</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ===== Receipt modal ===== -->
+<div class="modal-overlay" id="receiptModal">
+  <div class="plate receipt-box">
+    <span class="bl"></span><span class="br"></span>
+    <div class="receipt-head">
+      <div class="rbrand">PAUL ENTERPRISES</div>
+      <div class="rsub">Official Sales Receipt</div>
+      <div class="rno" id="rNo">Receipt No. —</div>
+    </div>
+    <div class="receipt-items" id="rItems"></div>
+    <div class="receipt-totals" id="rTotals"></div>
+    <div class="receipt-footer" id="rCashierLine">Cashier: Grace Kamau &middot; Main Branch<br>Thank you for shopping with us!</div>
+    <div class="receipt-footer" id="rContactLine" style="margin-top:6px;font-weight:600;">Call Us/WhatsApp/SMS: 0728752018. Asante Sana</div>
+    <div class="receipt-actions">
+      <button class="print-btn" onclick="window.print()">Print</button>
+      <button class="new-sale-btn" onclick="closeReceipt()">New Sale</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- Electron does not implement window.prompt() — it silently no-ops instead of
+     showing a dialog. This modal replaces every window.prompt() call in this file
+     with a real, awaitable, on-brand input dialog. See posPrompt() below. -->
+<div id="posPromptOverlay" style="display:none;position:fixed;inset:0;background:rgba(22,35,61,.55);z-index:1300;align-items:center;justify-content:center;">
+  <div style="background:var(--paper,#FCFDFF);border:1px solid var(--brass,#A9812F);border-radius:4px;padding:24px;width:340px;max-width:90vw;box-shadow:0 12px 40px rgba(22,35,61,.35);">
+    <div id="posPromptLabel" style="font-family:'Fraunces',serif;font-weight:700;font-size:16px;color:var(--ink,#16233D);margin-bottom:14px;"></div>
+    <input id="posPromptInput" type="text" style="width:100%;box-sizing:border-box;padding:10px 12px;border:1px solid var(--stone-dim,#DCE3F1);border-radius:3px;font-family:inherit;font-size:14px;color:var(--ink,#16233D);margin-bottom:18px;" />
+    <div style="display:flex;gap:10px;justify-content:flex-end;">
+      <button id="posPromptCancel" style="padding:8px 16px;border:1px solid var(--stone-dim,#DCE3F1);background:none;border-radius:3px;cursor:pointer;">Cancel</button>
+      <button id="posPromptOk" style="padding:8px 16px;background:var(--teal,#1E7A82);color:var(--paper,#FCFDFF);border:none;border-radius:3px;cursor:pointer;">OK</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Promise-based drop-in replacement for window.prompt(message, defaultValue).
+  // Resolves with the entered string on OK/Enter, or null on Cancel/Escape —
+  // same contract as window.prompt so every call site just adds "await".
+  function posPrompt(message, defaultValue){
+    return new Promise((resolve) => {
+      const overlay = document.getElementById('posPromptOverlay');
+      const label = document.getElementById('posPromptLabel');
+      const input = document.getElementById('posPromptInput');
+      const okBtn = document.getElementById('posPromptOk');
+      const cancelBtn = document.getElementById('posPromptCancel');
+
+      label.textContent = message || '';
+      input.value = defaultValue != null ? defaultValue : '';
+      overlay.style.display = 'flex';
+      input.focus();
+      input.select();
+
+      function cleanup(result){
+        overlay.style.display = 'none';
+        okBtn.removeEventListener('click', onOk);
+        cancelBtn.removeEventListener('click', onCancel);
+        input.removeEventListener('keydown', onKeydown);
+        resolve(result);
+      }
+      function onOk(){ cleanup(input.value); }
+      function onCancel(){ cleanup(null); }
+      function onKeydown(e){
+        if(e.key === 'Enter'){ e.preventDefault(); onOk(); }
+        else if(e.key === 'Escape'){ e.preventDefault(); onCancel(); }
+      }
+      okBtn.addEventListener('click', onOk);
+      cancelBtn.addEventListener('click', onCancel);
+      input.addEventListener('keydown', onKeydown);
+    });
+  }
+</script>
+
+<script>
+  // ---- Session state (populated from the main process, not sessionStorage) ----
+  let session = null;      // {userId, name, role, branchId, branchName, shiftId}
+  let PRODUCTS = [];        // loaded from window.pos.products.list()
+  let SUPPLIERS = [];        // loaded from window.pos.suppliers.list()
+  let CUSTOMERS = [];        // loaded from window.pos.customers.list()
+  const CAT_ICONS = {Groceries:'🛒', Household:'🧼', Beverages:'🥤', Stationery:'📓'};
+  const CAT_FALLBACK_ICON = '📦';
+
+  let activeCat = "All";
+  let cart = []; // {productId, name, price, vat, qty}
+  let payMethod = "Cash";
+  let batch = []; // {productId, name, qty, cost, supplierId, supplierName}
+  let currentShiftId = null;
+  let shiftStart = null;
+  let BIZ_SETTINGS = null; // { receipt_footer, receipt_contact_line, phone, ... }
+
+  function fmt(n){ return "KSh " + Number(n||0).toLocaleString('en-KE', {maximumFractionDigits:2}); }
+
+  // ---- Boot sequence: gate on a real session, then load real data ----
+  (async function init(){
+    try{
+      session = await window.pos.auth.currentSession();
+    }catch(err){
+      console.error('currentSession failed', err);
+    }
+    if(!session || session.role !== 'cashier'){
+      window.location.href = 'login.html';
+      return;
+    }
+    try{ BIZ_SETTINGS = await window.pos.settings.get(); }catch(err){ console.error('settings.get failed', err); }
+    applySignedInUser();
+    renderReceiptContactLine();
+    currentShiftId = session.shiftId || null;
+
+    try{
+      const shift = await window.pos.shifts.current(session.userId);
+      if(shift){ currentShiftId = shift.id; shiftStart = new Date(shift.clock_in.replace(' ', 'T')); }
+    }catch(err){ console.error('shifts.current failed', err); }
+
+    await Promise.all([loadProducts(), loadSuppliers(), loadCustomers()]);
+    document.getElementById('pDate').valueAsDate = new Date();
+    renderCategories();
+    renderProducts();
+    populateSupplierSelect();
+    populateProductSelect();
+    renderCart();
+    renderBatch();
+    tickClock(); setInterval(tickClock, 30000);
+    tickShift(); setInterval(tickShift, 60000);
+  })();
+
+  function applySignedInUser(){
+    document.querySelector('.shift-name').textContent = session.name;
+    const initials = session.name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+    document.querySelector('.shift-avatar').textContent = initials;
+    document.querySelector('.shift-role').textContent = 'Cashier · ' + (session.branchName || 'Unassigned');
+    const thankYou = (BIZ_SETTINGS && BIZ_SETTINGS.receipt_footer) || 'Thank you for shopping with us!';
+    document.getElementById('rCashierLine').innerHTML = `Cashier: ${session.name} &middot; ${session.branchName || ''}<br>${thankYou}`;
+  }
+
+  // Contact/WhatsApp line at the very bottom of every receipt. Pulls from
+  // Settings so the owner can change the number without touching code, but
+  // falls back to the shop's current number if Settings hasn't loaded yet.
+  function renderReceiptContactLine(){
+    const line = (BIZ_SETTINGS && BIZ_SETTINGS.receipt_contact_line) || 'Call Us/WhatsApp/SMS: 0728752018. Asante Sana';
+    document.getElementById('rContactLine').textContent = line;
+  }
+
+  async function logout(){
+    try{ await window.pos.auth.logout(); }catch(err){ console.error('logout failed', err); }
+    window.location.href = 'login.html';
+  }
+
+  // ---- Data loaders ----
+  async function loadProducts(){
+    try{
+      const [rows, stockRows] = await Promise.all([
+        window.pos.products.list({ activeOnly: true }),
+        window.pos.stock.branchStock(session.branchId),
+      ]);
+      const stockByProduct = new Map(stockRows.map(s => [s.product_id, s.quantity_on_hand]));
+      PRODUCTS = rows.map(p => ({
+        id: p.id, name: p.name, sku: p.sku || '', cat: p.category_name || 'Uncategorized',
+        price: p.selling_price, costPrice: p.cost_price,
+        vat: p.vat_applicable ? p.vat_rate : 0,
+        icon: CAT_ICONS[p.category_name] || CAT_FALLBACK_ICON,
+        stock: stockByProduct.get(p.id) ?? 0,
+        reorderLevel: p.reorder_level,
+      }));
+    }catch(err){
+      showToast('Could not load products: ' + err.message);
+    }
+  }
+  async function loadSuppliers(){
+    try{ SUPPLIERS = await window.pos.suppliers.list(); }
+    catch(err){ showToast('Could not load suppliers: ' + err.message); }
+  }
+  async function loadCustomers(){
+    try{ CUSTOMERS = await window.pos.customers.list(); }
+    catch(err){ showToast('Could not load customers: ' + err.message); }
+  }
+
+  // ---- Live clock ----
+  function tickClock(){
+    const now = new Date();
+    document.getElementById('clockTime').textContent = now.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+    document.getElementById('clockDate').textContent = now.toLocaleDateString('en-US',{weekday:'short',day:'2-digit',month:'short',year:'numeric'});
+  }
+
+  // ---- Shift status / clock in-out ----
+  function tickShift(){
+    const dot = document.querySelector('.shift-dot');
+    const btn = document.getElementById('shiftBtn');
+    const timeEl = document.getElementById('shiftTime');
+    if(currentShiftId && shiftStart){
+      const mins = Math.max(0, Math.round((Date.now() - shiftStart.getTime())/60000));
+      timeEl.textContent = `On shift · ${Math.floor(mins/60)}h ${String(mins%60).padStart(2,'0')}m`;
+      dot.style.background = 'var(--forest)';
+      btn.textContent = 'Clock Out';
+    } else {
+      timeEl.textContent = 'Off shift';
+      dot.style.background = 'var(--clay)';
+      btn.textContent = 'Clock In';
+    }
+  }
+  async function toggleShift(){
+    try{
+      if(currentShiftId){
+        await window.pos.shifts.clockOut(currentShiftId);
+        currentShiftId = null; shiftStart = null;
+        showToast('Clocked out. Sales are paused until you clock in again.');
+      } else {
+        const shift = await window.pos.shifts.clockIn(session.userId, session.branchId);
+        currentShiftId = shift.id; shiftStart = new Date(shift.clock_in.replace(' ', 'T'));
+        showToast('Clocked in.');
+      }
+      tickShift();
+    }catch(err){
+      showToast('Could not update shift: ' + err.message);
+    }
+  }
+
+  // ---- Tabs ----
+  function showView(v){
+    document.getElementById('viewSale').classList.toggle('on', v==='sale');
+    document.getElementById('viewPurchase').classList.toggle('on', v==='purchase');
+    document.getElementById('tabBtnSale').classList.toggle('on', v==='sale');
+    document.getElementById('tabBtnPurchase').classList.toggle('on', v==='purchase');
+  }
+
+  // ---- Product grid ----
+  function renderCategories(){
+    const cats = ["All", ...new Set(PRODUCTS.map(p=>p.cat))];
+    const row = document.getElementById('catRow');
+    row.innerHTML = cats.map(c => `<button class="cat-chip ${c===activeCat?'on':''}" onclick="setCat('${c}')">${c}</button>`).join('');
+  }
+  function setCat(c){ activeCat = c; renderCategories(); renderProducts(); }
+  function renderProducts(){
+    const q = document.getElementById('productSearch').value.trim().toLowerCase();
+    const grid = document.getElementById('productGrid');
+    const list = PRODUCTS.filter(p =>
+      (activeCat==='All' || p.cat===activeCat) &&
+      (p.name.toLowerCase().includes(q) || p.sku.toLowerCase().includes(q))
+    );
+    grid.innerHTML = list.map((p,i) => {
+      const stockClass = p.stock <= 0 ? 'stock-out' : (p.stock <= p.reorderLevel ? 'stock-low' : 'stock-ok');
+      const stockLabel = p.stock <= 0 ? 'Out of stock' : `${p.stock} left`;
+      return `
+      <div class="p-card ${p.stock<=0?'p-disabled':''}" onclick='addToCart(${p.id})'>
+        <span class="p-vat ${p.vat===0?'zero':''}">${p.vat===0?'No VAT':'VAT '+p.vat+'%'}</span>
+        <div class="p-icon">${p.icon}</div>
+        <div class="p-name">${p.name}</div>
+        <div class="p-cat">${p.cat}</div>
+        <div class="p-price">${fmt(p.price)}</div>
+        <div class="p-stock ${stockClass}">${stockLabel}</div>
+      </div>`;
+    }).join('') || `<div class="cart-empty" style="grid-column:1/-1;">No products match your search.</div>`;
+  }
+
+  // ---- Cart ----
+  function addToCart(productId){
+    const p = PRODUCTS.find(x => x.id === productId);
+    if(!p) return;
+    if(p.stock <= 0){ showToast(`${p.name} is out of stock.`); return; }
+    const existing = cart.find(c => c.productId === p.id);
+    const currentQtyInCart = existing ? existing.qty : 0;
+    if(currentQtyInCart + 1 > p.stock){ showToast(`Only ${p.stock} left of ${p.name} — can't add more.`); return; }
+    if(existing){ existing.qty++; } else { cart.push({productId:p.id, name:p.name, price:p.price, vat:p.vat, qty:1, maxStock:p.stock}); }
+    renderCart();
+  }
+  function changeQty(i, delta){
+    const item = cart[i];
+    if(delta > 0 && item.maxStock != null && item.qty + delta > item.maxStock){
+      showToast(`Only ${item.maxStock} left of ${item.name}.`);
+      return;
+    }
+    item.qty += delta;
+    if(item.qty <= 0) cart.splice(i,1);
+    renderCart();
+  }
+  function removeItem(i){ cart.splice(i,1); renderCart(); }
+
+  function renderCart(){
+    const wrap = document.getElementById('cartItems');
+    document.getElementById('cartCount').textContent = cart.reduce((a,c)=>a+c.qty,0) + " items";
+    if(cart.length === 0){
+      wrap.innerHTML = `<div class="cart-empty">Tap a product to add it to the sale.</div>`;
+    } else {
+      wrap.innerHTML = cart.map((c,i) => `
+        <div class="cart-row">
+          <div class="ci-name"><b>${c.name}</b><small>${fmt(c.price)} each</small></div>
+          <div class="qty-ctrl">
+            <button class="qty-btn" onclick="changeQty(${i},-1)">−</button>
+            <span class="qty-val">${c.qty}</span>
+            <button class="qty-btn" onclick="changeQty(${i},1)">+</button>
+          </div>
+          <div class="ci-line">${fmt(c.price*c.qty)}</div>
+          <button class="ci-remove" onclick="removeItem(${i})">✕</button>
+        </div>`).join('');
+    }
+    let subtotal = 0, vat = 0;
+    cart.forEach(c => { subtotal += c.price*c.qty; vat += c.price*c.qty*(c.vat/100); });
+    const discount = Math.min(Number(document.getElementById('discountInput').value)||0, subtotal+vat);
+    const total = subtotal + vat - discount;
+    document.getElementById('sumSubtotal').textContent = fmt(subtotal);
+    document.getElementById('sumVat').textContent = fmt(vat);
+    document.getElementById('sumDiscount').textContent = "− " + fmt(discount);
+    document.getElementById('sumTotal').textContent = fmt(total);
+    document.getElementById('checkoutBtn').disabled = cart.length === 0;
+  }
+
+  function setPayMethod(m){
+    payMethod = m;
+    document.querySelectorAll('.pay-opt').forEach(b => b.classList.toggle('on', b.dataset.method===m));
+  }
+
+  async function holdSale(){
+    if(cart.length===0){ showToast('Nothing to hold — the cart is empty.'); return; }
+    try{
+      await window.pos.sales.hold({ items: cart, discount: Number(document.getElementById('discountInput').value)||0, payMethod });
+      showToast('Sale held. Resume it any time before ringing up the next customer.');
+      cart = []; document.getElementById('discountInput').value=''; renderCart();
+    }catch(err){
+      showToast('Could not hold the sale: ' + err.message);
+    }
+  }
+
+  // Resolves the customer to bill for a Credit sale — looks up by phone,
+  // offers to create a new customer record if none matches.
+  async function resolveCreditCustomer(){
+    const phone = await posPrompt('Credit sale — enter the customer\'s phone number:');
+    if(!phone) return null;
+    const existing = CUSTOMERS.find(c => c.phone === phone.trim());
+    if(existing) return existing.id;
+    const name = await posPrompt('New customer — enter their name:');
+    if(!name) return null;
+    try{
+      const created = await window.pos.customers.create({ name: name.trim(), phone: phone.trim(), homeBranchId: session.branchId });
+      CUSTOMERS.push(created);
+      return created.id;
+    }catch(err){
+      showToast('Could not create customer: ' + err.message);
+      return null;
+    }
+  }
+
+  let lastSale = null;
+  async function completeSale(){
+    if(cart.length===0) return;
+    let subtotal=0, vat=0;
+    cart.forEach(c => { subtotal += c.price*c.qty; vat += c.price*c.qty*(c.vat/100); });
+    const discount = Math.min(Number(document.getElementById('discountInput').value)||0, subtotal+vat);
+    const total = subtotal + vat - discount;
+
+    let customerId = null, amountPaid = total, mpesaRef = null;
+    if(payMethod === 'Credit'){
+      customerId = await resolveCreditCustomer();
+      if(!customerId){ showToast('Credit sale cancelled — no customer selected.'); return; }
+      amountPaid = 0;
+    } else if(payMethod === 'M-Pesa'){
+      mpesaRef = await posPrompt('M-Pesa transaction code (optional):') || null;
+    }
+
+    const checkoutBtn = document.getElementById('checkoutBtn');
+    checkoutBtn.disabled = true;
+    try{
+      const sale = await window.pos.sales.create({
+        branchId: session.branchId,
+        customerId,
+        items: cart.map(c => ({ productId: c.productId, quantity: c.qty, unitPrice: c.price, discount: 0 })),
+        discount,
+        paymentMethod: payMethod,
+        amountPaid,
+        mpesaRef,
+      });
+      lastSale = sale;
+      document.getElementById('rNo').textContent = `Receipt No. ${sale.receipt_no} · ${payMethod}`;
+      document.getElementById('rItems').innerHTML = cart.map(c => `
+        <div class="r-item"><span class="rn">${c.name} × ${c.qty}<small>${c.vat>0? 'VAT '+c.vat+'% incl.' : 'VAT exempt'}</small></span><span>${fmt(c.price*c.qty)}</span></div>
+      `).join('');
+      document.getElementById('rTotals').innerHTML = `
+        <div class="t-row"><span>Subtotal</span><span>${fmt(subtotal)}</span></div>
+        <div class="t-row"><span>VAT</span><span>${fmt(vat)}</span></div>
+        <div class="t-row"><span>Discount</span><span>− ${fmt(discount)}</span></div>
+        <div class="t-row grand"><span>Total</span><span>${fmt(total)}</span></div>
+      `;
+      document.getElementById('shell').classList.add('blurred');
+      document.getElementById('receiptModal').classList.add('open');
+      await loadProducts(); renderProducts(); // stock just changed — refresh so quantities/low-stock reflect it
+    }catch(err){
+      showToast('Sale failed: ' + err.message);
+    }finally{
+      checkoutBtn.disabled = cart.length === 0;
+    }
+  }
+  function closeReceipt(){
+    document.getElementById('receiptModal').classList.remove('open');
+    document.getElementById('shell').classList.remove('blurred');
+    cart = []; document.getElementById('discountInput').value=''; renderCart();
+    showToast('Sale complete. Ready for the next customer.');
+  }
+
+  // ---- Purchases / add stock ----
+  function populateProductSelect(){
+    const sel = document.getElementById('pProduct');
+    sel.innerHTML = PRODUCTS.map(p => `<option value="${p.id}" data-cost="${p.costPrice ?? ''}">${p.name} (${p.sku})</option>`).join('');
+  }
+  function populateSupplierSelect(){
+    const sel = document.getElementById('pSupplier');
+    sel.innerHTML = SUPPLIERS.map(s => `<option value="${s.id}">${s.name}</option>`).join('') + `<option value="__new__">+ Add new supplier…</option>`;
+  }
+  async function handleSupplierSelect(){
+    const sel = document.getElementById('pSupplier');
+    if(sel.value !== '__new__') return;
+    const name = await posPrompt('New supplier name:');
+    if(!name){ sel.value = SUPPLIERS[0] ? SUPPLIERS[0].id : ''; return; }
+    try{
+      const created = await window.pos.suppliers.create({ name: name.trim() });
+      SUPPLIERS.push(created);
+      populateSupplierSelect();
+      sel.value = created.id;
+    }catch(err){
+      showToast('Could not add supplier: ' + err.message);
+      sel.value = SUPPLIERS[0] ? SUPPLIERS[0].id : '';
+    }
+  }
+  function addBatchLine(){
+    const productSel = document.getElementById('pProduct');
+    const supplierSel = document.getElementById('pSupplier');
+    const productId = Number(productSel.value);
+    const product = PRODUCTS.find(p => p.id === productId);
+    const supplierId = Number(supplierSel.value);
+    const supplier = SUPPLIERS.find(s => s.id === supplierId);
+    const qty = Number(document.getElementById('pQty').value);
+    const cost = Number(document.getElementById('pCost').value);
+    if(!product || !supplier || !qty || qty<=0 || !cost || cost<=0){
+      showToast('Add a quantity and cost price before adding this line.');
+      return;
+    }
+    batch.push({productId, name: product.name, qty, cost, supplierId, supplierName: supplier.name});
+    document.getElementById('pQty').value='';
+    document.getElementById('pCost').value='';
+    renderBatch();
+  }
+  function removeBatchLine(i){ batch.splice(i,1); renderBatch(); }
+  function renderBatch(){
+    const wrap = document.getElementById('batchList');
+    if(batch.length===0){
+      wrap.innerHTML = `<div class="batch-empty">No items added yet — fill the form on the left and add each product to this batch.</div>`;
+    } else {
+      wrap.innerHTML = `<table class="batch-table"><thead><tr><th>Product</th><th>Qty</th><th>Cost</th><th>Line Total</th><th></th></tr></thead><tbody>` +
+        batch.map((b,i) => `<tr>
+          <td><b>${b.name}</b><br><small style="font-family:'IBM Plex Mono',monospace;color:var(--ink-soft);">${b.supplierName}</small></td>
+          <td>${b.qty}</td>
+          <td>${fmt(b.cost)}</td>
+          <td>${fmt(b.qty*b.cost)}</td>
+          <td><button class="row-remove" onclick="removeBatchLine(${i})">✕</button></td>
+        </tr>`).join('') + `</tbody></table>`;
+    }
+    const total = batch.reduce((a,b)=>a+b.qty*b.cost,0);
+    document.getElementById('batchTotal').textContent = fmt(total);
+    document.getElementById('savePurchaseBtn').disabled = batch.length===0;
+  }
+  async function savePurchase(){
+    if(batch.length===0) return;
+    const invoiceRef = document.getElementById('pInvoice').value.trim() || null;
+    const btn = document.getElementById('savePurchaseBtn');
+    btn.disabled = true;
+    try{
+      // One purchase record per supplier — the batch UI allows mixed suppliers,
+      // but stock_purchases (and its total_cost/status) is scoped to one supplier per row.
+      const bySupplier = new Map();
+      batch.forEach(b => {
+        if(!bySupplier.has(b.supplierId)) bySupplier.set(b.supplierId, []);
+        bySupplier.get(b.supplierId).push(b);
+      });
+      let grandTotal = 0;
+      for(const [supplierId, lines] of bySupplier){
+        const purchase = await window.pos.purchases.create({
+          branchId: session.branchId,
+          supplierId,
+          items: lines.map(l => ({ productId: l.productId, quantity: l.qty, costPrice: l.cost })),
+          invoiceRef,
+          amountPaid: 0, // no "amount paid now" field in this form yet — recorded as fully owed
+        });
+        grandTotal += purchase.total_cost;
+      }
+      showToast(`Purchase saved. Stock updated for ${batch.length} line item(s) — total ${fmt(grandTotal)}.`);
+      batch = []; renderBatch();
+      await loadProducts(); renderProducts();
+    }catch(err){
+      showToast('Could not save purchase: ' + err.message);
+    }finally{
+      btn.disabled = batch.length === 0;
+    }
+  }
+
+  // ---- Toast ----
+  let toastTimer;
+  function showToast(msg){
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(()=>t.classList.remove('show'), 3200);
+  }
+</script>
+</body>
+</html>
